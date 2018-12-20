@@ -1,0 +1,56 @@
+project:
+  team: infra
+  metadata:
+    name: gracefulpy
+    staging:
+      project: aws
+      cluster: aws-eu-stg
+      min_instances: '2'
+      max_instances: '2'
+      externalAccess: private
+
+kubernetes:
+- id: gracefulpy
+  cpus: 0.5
+  mem: 256
+  autoscale:
+    min: '{{ min_instances }}'
+    max: '{{ max_instances }}'
+    cpuPercent: 70
+    memPercent: 70
+  ports:
+    - name: http
+      containerPort: 8080
+  livenessProbe:
+    httpGet:
+      path: /status
+      port: http
+    timeoutSeconds: 2
+    initialDelaySeconds: 10
+    periodSeconds: 1
+  labels:
+    dnsName: 'gracefulpy.qutics.com' 
+    externalAccess: '{{ externalAccess }}'
+- id: ungracefulpy
+  cpus: 0.5
+  mem: 256
+  autoscale:
+    min: '{{ min_instances }}'
+    max: '{{ max_instances }}'
+    cpuPercent: 70
+    memPercent: 70
+  env:
+    UNGRACEFUL: "1"
+  ports:
+    - name: http
+      containerPort: 8080
+  livenessProbe:
+    httpGet:
+      path: /status
+      port: http
+    timeoutSeconds: 2
+    initialDelaySeconds: 10
+    periodSeconds: 1
+  labels:
+    dnsName: 'ungracefulpy.qutics.com' 
+    externalAccess: '{{ externalAccess }}'

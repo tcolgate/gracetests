@@ -1,0 +1,10 @@
+aiofiles==0.4.0
+cchardet==2.1.1
+httptools==0.0.11
+psutil==5.4.5
+python-dotenv==0.8.2
+sanic==0.7.0
+Sanic-Plugins-Framework==0.6.5
+ujson==1.35
+uvloop==0.11.3
+websockets==7.0
