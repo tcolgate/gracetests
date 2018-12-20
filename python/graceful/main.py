@@ -34,8 +34,10 @@ async def root(req):
 
 
 SHUTTING_DOWN = False    
+
 @app.listener('before_server_stop')
 async def notify_server_stopping(app, loop):
+    global SHUTTING_DOWN
     if not os.environ.get('UNGRACEFUL'):
         print('Sleeping before shutting down!')
         SHUTTING_DOWN = True    
@@ -52,8 +54,8 @@ async def health_check(req):
     return json({
         'service': 'graceful-py',
         'startedAt': STARTED,
-        'status': 500
-    })
+        'status': status
+    },status=status)
 
 
 def main():
