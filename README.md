@@ -11,6 +11,30 @@ Whilst cluster scale up is generally seamless, (assuming we scale up
 sufficiently in advance of the need for the extra capacity), cluster scale down
 causes small, but noticable, interruption to services.
 
+There are also several causes of Pod termination.
+
+Some are caused by kubernetes directly:
+- Pod terminated manually by administrator.
+- HPA scales down, terminates the pod.
+- Rolling deployment, or deployment scales, terminates the pod.
+- Cluster autoscaler scales down the node instance group. Evicting
+  remaining pods on the node.
+
+In these instances a pod is terminated via the kube API. We can reasonably
+expect that any time the API deletes a pod, it should be done following the
+full graceful termination procedure.
+
+There are two other common situations.
+- The cloud provider terminates a Spot or Preemptible instance.
+- A cloud administrator terminates a node.
+
+In these circumstances the shutdown is instigated direct to the node, out of
+band from the kubernetes API. It is the node's responsibility to properly shut
+down. On receipt of the shutdown request the node should drain itself.
+With our Kops AWS deployment some additional configuration is needed at this
+time.  (https://medium.com/skedulo-engineering/minimising-the-impact-of-kubernetes-node-shutdowns-11cd8233e2fb)
+
+
 ## Hypothesis:
 
 Simply settings terminationGracePeriodSeconds on a Pod/Deployment is
@@ -41,8 +65,20 @@ gracefully shuts down (processing in-flight).
 
 The second version, ungracefully quits.
 
+Once basic graceful termination is confirmed further test is needed. We need
+to verify that graceful node termination correct respects graceful pod
+termination.
+
+- Force a deployment to a group of nodes.
+- run a continious load for a reasonable duration
+- Terminate one of the running nodes. 
+
 ## Gotchas
 
+### Node termination
+
+Our existing kops clusters were not respecting ACPI shutdown signals. Further
+configuration is required.
 
 ### Docker ENTRYPOINT
 
@@ -74,6 +110,7 @@ python sani at leasts respects both.
 
 ## Findings
 
+- Node shutdown should properly drain a node via the API.
 - Requests arrive after the arrival of the termination signal. Some period of
   listening after the arrival of the signal is essential.
 - Consequently, the biggest risk is exiting too quickly.
