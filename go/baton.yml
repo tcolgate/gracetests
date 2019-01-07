@@ -2,6 +2,7 @@ project:
   team: infra
   metadata:
     name: gracefulgo
+    version: "1.0"
     staging:
       project: aws
       cluster: aws-eu-stg
@@ -10,7 +11,7 @@ project:
       externalAccess: private
 
 kubernetes:
-- id: gracefulpygo
+- id: gracefulgo
   cpus: 0.5
   mem: 128
   autoscale:
