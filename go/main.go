@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/go-redis/redis"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
@@ -61,6 +63,26 @@ func rootHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(w, buf)
 }
 
+func redisHandler(rcli *redis.Client) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		now := time.Now()
+
+		log.Printf("redis ping: %#v", rcli.Incr("mykey"))
+		dur := time.Since(now)
+		log.Printf("duration: %s", dur)
+
+		resp := map[string]string{
+			"hello": "world",
+			"dur":   fmt.Sprintf("%#v", dur),
+		}
+
+		bs, _ := json.Marshal(resp)
+		buf := bytes.NewBuffer(bs)
+
+		io.Copy(w, buf)
+	}
+}
+
 func main() {
 
 	shutdownInt := int32(200)
@@ -86,6 +108,13 @@ func main() {
 
 	mux.Handle("/metrics", promhttp.Handler())
 	mux.Handle("/status", sh)
+
+	redisdb := redis.NewFailoverClient(&redis.FailoverOptions{
+		MasterName:    "mymaster",
+		SentinelAddrs: []string{"rfs-shared-redis.default:26379"},
+	})
+
+	mux.Handle("/redis", redisHandler(redisdb))
 
 	server := &http.Server{
 		Addr:         ":8080",
