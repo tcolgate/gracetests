@@ -34,7 +34,6 @@ down. On receipt of the shutdown request the node should drain itself.
 With our Kops AWS deployment some additional configuration is needed at this
 time.  (https://medium.com/skedulo-engineering/minimising-the-impact-of-kubernetes-node-shutdowns-11cd8233e2fb)
 
-
 ## Hypothesis:
 
 Simply settings terminationGracePeriodSeconds on a Pod/Deployment is
@@ -108,6 +107,12 @@ os.Interrupt (if we wish to be able to test graceful shutdown with ctrl-c). In
 python sani at leasts respects both.
 
 
+## Additional considerations
+
+- Health checks from a cloud provided ingress may not follow the cadence of the
+  specified health checks.
+- externalTrafficPolicy further confuses matters.
+
 ## Findings
 
 - Node shutdown should properly drain a node via the API.
@@ -127,3 +132,4 @@ python sani at leasts respects both.
   to the shutdown procedures of many http servers (Go and Python/sanic at
   least). These shutdown processes are important for ensuring in-flight requests
   are complete.
+
