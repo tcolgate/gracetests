@@ -84,7 +84,6 @@ func redisHandler(rcli *redis.Client) http.HandlerFunc {
 }
 
 func main() {
-
 	shutdownInt := int32(200)
 	sh := &statusHandler{
 		shutdown: &shutdownInt,
