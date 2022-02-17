@@ -14,7 +14,7 @@ setup(
     license='All rights reserved.',
     packages=find_packages(),
     install_requires=[
-        'sanic==0.7.0',
+        'sanic==20.12.6',
         'ujson==1.35',
         'python-dotenv==0.8.2',
         'cchardet==2.1.1',
