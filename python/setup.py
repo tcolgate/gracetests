@@ -15,7 +15,7 @@ setup(
     packages=find_packages(),
     install_requires=[
         'sanic==0.7.0',
-        'ujson==1.35',
+        'ujson==5.2.0',
         'python-dotenv==0.8.2',
         'cchardet==2.1.1',
     ],
